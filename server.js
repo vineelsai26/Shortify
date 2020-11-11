@@ -10,6 +10,7 @@ const url = process.env.MONGODB
 
 app.use(bodyParser.urlencoded({extended: false}))
 app.use(bodyParser.json())
+app.use(express.static('public'))
 app.use('/generateUrl', router)
 
 mongodb.connect(url, {
