@@ -27,21 +27,6 @@ app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html')
 })
 
-app.get('/redirect/:url', (req, res) => {
-    const redirectUrl = req.params.url
-    const dbRequestUrl = req.protocol + '://' + req.get('host') + '/generateUrl'
-
-    axios.get(dbRequestUrl)
-        .then(res => res.data)
-        .then((json) => {
-            json.forEach((item) => {
-                if (item.newURL === redirectUrl) {
-                    res.redirect('https://' + item.url)
-                }
-            })
-        })
-})
-
 app.post('/url', async (req, res) => {
     let postedUrl = req.body.url
     const dbRequestUrl = req.protocol + '://' + req.get('host') + '/generateUrl'
@@ -61,6 +46,22 @@ app.post('/url', async (req, res) => {
     res.end()
 })
 
+app.get('/:url', (req, res) => {
+    const redirectUrl = req.params.url
+    const dbRequestUrl = req.protocol + '://' + req.get('host') + '/generateUrl'
+
+    axios.get(dbRequestUrl)
+        .then(res => res.data)
+        .then((json) => {
+            json.forEach((item) => {
+                if (item.newURL === redirectUrl) {
+                    res.redirect('https://' + item.url)
+                }
+            })
+        })
+})
+
+
 function isUrl(str) {
     let regexp = /^(?:(?:https?|ftp):\/\/)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:\/\S*)?$/;
     return regexp.test(str);
@@ -78,7 +79,7 @@ function generateUrl(json, postedUrl, req, res) {
         json.forEach((item) => {
             if (item.url === postedUrl) {
                 console.log(item.newURL)
-                res.send(req.protocol + '://' + req.get('host') + '/redirect/' + item.newURL)
+                res.send(req.protocol + '://' + req.get('host') + '/' + item.newURL)
             }
         })
     } else {
