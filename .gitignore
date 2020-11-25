@@ -1,4 +1,4 @@
 .idea
 node_modules
-git.io-clone.iml
 .env
+package-lock.json
