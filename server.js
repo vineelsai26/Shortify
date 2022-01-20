@@ -6,14 +6,16 @@ const axios = require('axios')
 require('dotenv').config()
 
 const app = express()
-const url = process.env.MONGODB
+const mongodbUrl = process.env.MONGODB
+const dbRequestUrl = 'http://localhost:5000/generateUrl'
 
-app.use(bodyParser.urlencoded({extended: false}))
+app.set('view engine', 'ejs')
+app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 app.use(express.static('public'))
 app.use('/generateUrl', router)
 
-mongodb.connect(url, {
+mongodb.connect(mongodbUrl, {
     useCreateIndex: true,
     useNewUrlParser: true,
     useUnifiedTopology: true
@@ -24,31 +26,30 @@ connect.on('open', () => {
 })
 
 app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/index.html')
+    res.render('index', { 'postedUrl': '', 'error': '', 'url': '' })
 })
 
-app.post('/url', async (req, res) => {
+app.post('/', async (req, res) => {
     let postedUrl = req.body.url
-    const dbRequestUrl = req.protocol + '://' + req.get('host') + '/generateUrl'
-
+    postedUrl = postedUrl.toLowerCase()
+    postedUrl = postedUrl.trim()
     postedUrl = postedUrl.replace('https://', '')
     postedUrl = postedUrl.replace('http://', '')
 
     if (isUrl(postedUrl)) {
-        res.send(await axios.get(dbRequestUrl)
+        await axios.get(dbRequestUrl)
             .then(res => res.data)
             .then((json) => {
-                return generateUrl(json, postedUrl, req, res)
-            }))
+                let url = req.protocol + '://' + req.get('host') + '/' + generateUrl(json, postedUrl, req)
+                res.render('index', { 'postedUrl': postedUrl, 'error': '', 'url': url })
+            })
     } else {
-        res.send("not an url")
+        res.render('index', { 'postedUrl': postedUrl, 'error': 'Invalid URL', 'url': '' })
     }
-    res.end()
 })
 
 app.get('/:url', (req, res) => {
     const redirectUrl = req.params.url
-    const dbRequestUrl = req.protocol + '://' + req.get('host') + '/generateUrl'
 
     axios.get(dbRequestUrl)
         .then(res => res.data)
@@ -63,14 +64,14 @@ app.get('/:url', (req, res) => {
 
 
 function isUrl(str) {
-    let regexp = /^(?:(?:https?|ftp):\/\/)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:\/\S*)?$/;
-    return regexp.test(str);
+    let regexp = /^(?:(?:https?|ftp):\/\/)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:\/\S*)?$/
+    return regexp.test(str)
 }
 
-function generateUrl(json, postedUrl, req, res) {
-    const dbRequestUrl = req.protocol + '://' + req.get('host') + '/generateUrl'
+function generateUrl(json, postedUrl, req) {
     let urls = []
     let newUrls = []
+    let newURL = ''
     json.forEach((item) => {
         urls.push(item.url)
         newUrls.push(item.newURL)
@@ -78,12 +79,11 @@ function generateUrl(json, postedUrl, req, res) {
     if (urls.includes(postedUrl)) {
         json.forEach((item) => {
             if (item.url === postedUrl) {
-                console.log(item.newURL)
-                res.send(req.protocol + '://' + req.get('host') + '/' + item.newURL)
+                newURL = item.newURL
             }
         })
     } else {
-        let newUrl = generateNewUrl(newUrls)
+        newUrl = generateNewUrl(newUrls)
 
         axios.post(dbRequestUrl, {
             url: postedUrl,
@@ -93,8 +93,8 @@ function generateUrl(json, postedUrl, req, res) {
         }).catch(error => {
             console.error(error)
         })
-        res.send(req.protocol + '://' + req.get('host') + '/redirect/' + newUrl)
     }
+    return newURL
 }
 
 function generateNewUrl(newUrls) {
