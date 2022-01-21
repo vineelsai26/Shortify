@@ -3,17 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <link href="style.css" rel="stylesheet">
-    <title>URL Shortener</title>
+    <title>Shortify</title>
 </head>
 
 <body>
-    <div>
+    <div id="navbar" class="navbar">
+        <a href="/" id="logo">Shortify</a>
+        <div class="navbarRight">
+            <a href="/">Home</a>
+            <a href="https://github.com/vineelsai26" target="_blank">GitHub</a>
+        </div>
+    </div>
+    <div style="padding-top: 30vh;">
         <form action="/" method="post" class="form">
             <label for="url">
-                <input id="url" name="url" type="text" class="text" value="<%= postedUrl %> ">
+                <input id="url" name="url" type="text" class="text" value="<%= postedUrl %>" required>
             </label>
+            <p class="errorMsg">
+                <%- error %>
+            </p>
             <p class="redirectUrl">
-                <a href="<%= url %> ">
+                <a href="<%= url %>" target="_blank" class="removeUnderline">
                     <%- url %>
                 </a>
             </p>
@@ -23,7 +33,7 @@
 
     <div>
         <p class="credit">By Vineel Sai, See Source at
-            <a href="https://github.com/vineelsai26/URL-Shortener">GitHub</a>
+            <a href="https://github.com/vineelsai26/Shortify" target="_blank" class="removeUnderline">GitHub</a>
         </p>
     </div>
 </body>

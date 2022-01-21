@@ -1,17 +1,82 @@
+html{
+    font-family: sans-serif;
+}
+
+body{
+    background-color: rgb(244, 244, 244);
+    margin: 0;
+}
+
+.navbar {
+    background-color: white;
+    padding: 20px 10px;
+    padding-inline-start: 100px;
+    padding-bottom: 15px;
+    padding-top: 15px;
+    position: fixed;
+    width: 100%;
+    z-index: 100;
+}
+
+.navbar a {
+    float: left;
+    color: dodgerblue;
+    text-align: center;
+    font-weight: bold;
+    padding: 12px;
+    text-decoration: none;
+    font-size: 30px; 
+    line-height: 25px;
+    border-radius: 4px;
+}
+
+.navbarRight {
+    float: right;
+    padding-right: 200px;
+}
+
+.navbarRight a {
+    font-size: 20px; 
+    width: 110px;
+}
+
+.navbarRight a:hover {
+    background-color: rgb(0, 100, 200);
+    color: white;
+    animation-name: expand-width;
+    animation-duration: 1s;
+}
+
+.navbarRight .active {
+    background-color: rgb(0, 100, 200);
+    color: white;
+}
+
 .form {
-    margin: 30vh auto auto;
     width: 300px;
+    margin: 0 auto;
 }
 
 .text {
     width: 100%;
     padding: 12px;
     margin: 8px 0;
-    box-sizing: border-box;
+    box-sizing: content-box;
+    font-size: large;
 }
 
 .redirectUrl{
     text-align: center;
+}
+
+.errorMsg{
+    font-weight: bolder;
+    color: red;
+    text-align: center;
+}
+
+.removeUnderline{
+    text-decoration: none;
 }
 
 .credit {
@@ -30,7 +95,10 @@
     font-size:15px;
     border-width: 0;
     padding:15px 30px;
-    margin-left: 100px;
+    margin: 0;
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, 0%);
 }
 
 .button:hover {
