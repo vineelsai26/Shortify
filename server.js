@@ -15,11 +15,7 @@ app.use(bodyParser.json())
 app.use(express.static('public'))
 app.use('/generateUrl', router)
 
-mongodb.connect(mongodbUrl, {
-    useCreateIndex: true,
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-})
+mongodb.connect(mongodbUrl)
 const connect = mongodb.connection
 connect.on('open', () => {
     console.log('connected')
@@ -39,8 +35,9 @@ app.post('/', async (req, res) => {
     if (isUrl(postedUrl)) {
         await axios.get(dbRequestUrl)
             .then(res => res.data)
-            .then((json) => {
-                let url = req.protocol + '://' + req.get('host') + '/' + generateUrl(json, postedUrl)
+            .then(async (json) => {
+                const newURL = await generateUrl(json, postedUrl)
+                const url = req.protocol + '://' + req.get('host') + '/' + newURL
                 res.render('index', { 'postedUrl': postedUrl, 'error': '', 'url': url })
             })
     } else {
@@ -67,7 +64,7 @@ function isUrl(str) {
     return regexp.test(str)
 }
 
-function generateUrl(json, postedUrl) {
+async function generateUrl(json, postedUrl) {
     let urls = []
     let newUrls = []
     let newURL = ''
@@ -82,11 +79,11 @@ function generateUrl(json, postedUrl) {
             }
         })
     } else {
-        newUrl = generateNewUrl(newUrls)
+        newURL = generateNewUrl(newUrls)
 
-        axios.post(dbRequestUrl, {
+        await axios.post(dbRequestUrl, {
             url: postedUrl,
-            newURL: newUrl
+            newURL: newURL
         }).then(res => {
             console.log(`statusCode: ${res.statusText}`)
         }).catch(error => {
@@ -97,11 +94,11 @@ function generateUrl(json, postedUrl) {
 }
 
 function generateNewUrl(newUrls) {
-    let newUrl = makeUrl()
-    if (newUrls.includes(newUrl)) {
+    let newURL = makeUrl()
+    if (newUrls.includes(newURL)) {
         generateNewUrl(newUrls)
     } else {
-        return newUrl
+        return newURL
     }
 }
 
