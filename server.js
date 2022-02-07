@@ -28,7 +28,6 @@ app.get('/', (req, res) => {
 app.post('/', async (req, res) => {
     let postedUrl = req.body.url
     postedUrl = postedUrl.trim()
-    postedUrl = postedUrl.toLowerCase()
     postedUrl = postedUrl.replace('https://', '')
     postedUrl = postedUrl.replace('http://', '')
 
@@ -104,9 +103,9 @@ function generateNewUrl(newUrls) {
 
 function makeUrl() {
     let result = ''
-    let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
+    let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
     let charactersLength = characters.length
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 6; i++) {
         result += characters.charAt(Math.floor(Math.random() * charactersLength))
     }
     return result
