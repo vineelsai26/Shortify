@@ -21,7 +21,8 @@ router.post('/', async (req, res) => {
         const saveToDB = await NewUrl.save()
         res.json(saveToDB)
     } catch (err) {
-        res.send(err)
+        console.log(err)
+        res.send("Error")
     }
 })
 

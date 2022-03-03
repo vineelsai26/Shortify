@@ -24,8 +24,10 @@
                 <%- error %>
             </p>
             <p class="redirectUrl">
-                <a href="<%= url %>" target="_blank" class="removeUnderline">
-                    <%- url %>
+                <a href="<%= url %>" target="_blank" class="removeUnderline" rel="noopener noreferrer">
+                    <script>
+                        document.write("<%= url %>")
+                    </script>
                 </a>
             </p>
             <input type="submit" class="button">
