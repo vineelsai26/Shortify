@@ -6,10 +6,19 @@ const urlSchema = new mongoose.Schema({
         unique: true,
         required: true
     },
-    newURL: {
+    redirectUrl: {
         type: String,
         unique: true,
         required: true
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    },
+    protocol: {
+        type: String,
+        required: true,
+        default: 'https'
     }
 })
 

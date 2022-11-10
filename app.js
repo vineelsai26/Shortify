@@ -1,19 +1,17 @@
+const serverless = require('serverless-http');
 const express = require("express")
 const bodyParser = require("body-parser")
 const mongodb = require('mongoose')
-const router = require('./routers/urlRouter')
-const axios = require('axios')
+const UrlModel = require('./models/urlModel')
 require('dotenv').config()
 
 const app = express()
 const mongodbUrl = process.env.MONGODB
-const dbRequestUrl = 'http://localhost:5000/generateUrl'
 
 app.set('view engine', 'ejs')
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 app.use(express.static('public'))
-app.use('/generateUrl', router)
 
 mongodb.connect(mongodbUrl)
 const connect = mongodb.connection
@@ -27,35 +25,35 @@ app.get('/', (req, res) => {
 
 app.post('/', async (req, res) => {
     let postedUrl = req.body.url
+
     postedUrl = postedUrl.trim()
     postedUrl = postedUrl.replace('https://', '')
     postedUrl = postedUrl.replace('http://', '')
 
     if (isUrl(postedUrl)) {
-        await axios.get(dbRequestUrl)
-            .then(res => res.data)
-            .then(async (json) => {
-                const newURL = await generateUrl(json, postedUrl)
-                const url = req.protocol + '://' + req.get('host') + '/' + newURL
-                res.render('index', { 'postedUrl': postedUrl, 'error': '', 'url': url })
-            })
+        const newURL = await generateUrl(postedUrl)
+        const url = req.protocol + '://' + req.get('host') + '/' + newURL
+        res.render('index', { 'postedUrl': postedUrl, 'error': '', 'url': url })
+
     } else {
         res.render('index', { 'postedUrl': postedUrl, 'error': 'Invalid URL', 'url': '' })
     }
 })
 
 app.get('/:url', (req, res) => {
-    const redirectUrl = req.params.url
+    const url = req.params.url
 
-    axios.get(dbRequestUrl)
-        .then(res => res.data)
-        .then((json) => {
-            json.forEach((item) => {
-                if (item.newURL === redirectUrl) {
-                    res.redirect('https://' + item.url)
-                }
-            })
-        })
+    UrlModel.findOne({ url: url }, (err, url) => {
+        if (err) {
+            console.log(err)
+        } else {
+            if (url) {
+                res.redirect(`${url.protocol}://${url.redirectUrl}`)
+            } else {
+                res.redirect('/')
+            }
+        }
+    })
 })
 
 function isUrl(str) {
@@ -67,39 +65,32 @@ function isUrl(str) {
     }
 }
 
-async function generateUrl(json, postedUrl) {
-    let urls = []
-    let newUrls = []
-    let newURL = ''
-    json.forEach((item) => {
-        urls.push(item.url)
-        newUrls.push(item.newURL)
-    })
-    if (urls.includes(postedUrl)) {
-        json.forEach((item) => {
-            if (item.url === postedUrl) {
-                newURL = item.newURL
-            }
-        })
+async function generateUrl(redirectUrl) {
+    const url = await UrlModel.findOne({ redirectUrl: redirectUrl })
+    if (url && url.url) {
+        return url.url
     } else {
-        newURL = generateNewUrl(newUrls)
+        const newURL = await generateNewUrl()
 
-        await axios.post(dbRequestUrl, {
-            url: postedUrl,
-            newURL: newURL
-        }).then(res => {
-            console.log(`statusCode: ${res.statusText}`)
-        }).catch(error => {
-            console.error(error)
+        const NewUrl = new UrlModel({
+            url: newURL,
+            redirectUrl: redirectUrl
         })
+
+        try {
+            const saveToDB = await NewUrl.save()
+            return saveToDB.url
+        } catch (err) {
+            console.log(err)
+        }
     }
-    return newURL
 }
 
-function generateNewUrl(newUrls) {
+async function generateNewUrl() {
     let newURL = makeUrl()
-    if (newUrls.includes(newURL)) {
-        generateNewUrl(newUrls)
+    const url = await UrlModel.findOne({ url: newURL })
+    if (url && url._id) {
+        return await generateNewUrl()
     } else {
         return newURL
     }
@@ -109,10 +100,11 @@ function makeUrl() {
     let result = ''
     let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
     let charactersLength = characters.length
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i <= 6; i++) {
         result += characters.charAt(Math.floor(Math.random() * charactersLength))
     }
     return result
 }
 
 app.listen(process.env.PORT || 5000)
+// module.exports.handler = serverless(app)
