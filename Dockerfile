@@ -10,4 +10,4 @@ RUN npm install -g pm2
 COPY . .
 
 EXPOSE 5000
-CMD [ "pm2", "start", "server.js -i 4" ]
+CMD [ "pm2", "start", "server.js" ]
