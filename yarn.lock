@@ -229,10 +229,10 @@ ee-first@1.1.1:
   resolved "https://registry.yarnpkg.com/ee-first/-/ee-first-1.1.1.tgz#590c61156b0ae2f4f0255732a158b266bc56b21d"
   integrity sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==
 
-ejs@^3.1.8:
-  version "3.1.8"
-  resolved "https://registry.yarnpkg.com/ejs/-/ejs-3.1.8.tgz#758d32910c78047585c7ef1f92f9ee041c1c190b"
-  integrity sha512-/sXZeMlhS0ArkfX2Aw780gJzXSMPnKjtspYZv+f3NiKLlubezAHDU5+9xz6gd3/NhG3txQCo6xlglmTS+oTGEQ==
+ejs@^3.1.9:
+  version "3.1.9"
+  resolved "https://registry.yarnpkg.com/ejs/-/ejs-3.1.9.tgz#03c9e8777fe12686a9effcef22303ca3d8eeb361"
+  integrity sha512-rC+QVNMJWv+MtPgkt0y+0rVEIdbtxVADApW9JXrUVlzHetgcyczP/E7DJmWJ4fJCZF2cPcBk0laWO9ZHMG3DmQ==
   dependencies:
     jake "^10.8.5"
 
@@ -520,10 +520,10 @@ mongodb@5.1.0:
   optionalDependencies:
     saslprep "^1.0.3"
 
-mongoose@^7.0.0:
-  version "7.0.0"
-  resolved "https://registry.yarnpkg.com/mongoose/-/mongoose-7.0.0.tgz#4b1394fdd56fcf0d6e78c7be9768edcc3254cc26"
-  integrity sha512-U0YPURDld+k/nvvSG1mRClQSjZMRXwQKSU5yb9PslRnOmVz0UlBD7SjSnjUuGT0yk+7BH+kJNimsKqMxYAKkMA==
+mongoose@^7.0.4:
+  version "7.0.4"
+  resolved "https://registry.yarnpkg.com/mongoose/-/mongoose-7.0.4.tgz#7f6c31e12d86eed516ab5d1f5e6f8196d3682ed2"
+  integrity sha512-MEmQOOqQUvW1PJcji64NtA2EFGHrEvk9o4g//isVYSJW2+8Y8u49C2qFBKzn1t6/l9onQn012o/PcFqR6ixQpQ==
   dependencies:
     bson "^5.0.1"
     kareem "2.5.1"
@@ -570,10 +570,10 @@ negotiator@0.6.3:
   resolved "https://registry.yarnpkg.com/negotiator/-/negotiator-0.6.3.tgz#58e323a72fedc0d6f9cd4d31fe49f51479590ccd"
   integrity sha512-+EUsqGPLsM+j/zdChZjsnX51g4XrHFOIXwfnCVPGlQk/k5giakcKsuxCObBRu6DSm9opw/O6slWbJdghQM4bBg==
 
-nodemon@^2.0.20:
-  version "2.0.20"
-  resolved "https://registry.yarnpkg.com/nodemon/-/nodemon-2.0.20.tgz#e3537de768a492e8d74da5c5813cb0c7486fc701"
-  integrity sha512-Km2mWHKKY5GzRg6i1j5OxOHQtuvVsgskLfigG25yTtbyfRGn/GNvIbRyOf1PSCKJ2aT/58TiuUsuOU5UToVViw==
+nodemon@^2.0.22:
+  version "2.0.22"
+  resolved "https://registry.yarnpkg.com/nodemon/-/nodemon-2.0.22.tgz#182c45c3a78da486f673d6c1702e00728daf5258"
+  integrity sha512-B8YqaKMmyuCO7BowF1Z1/mkPqLk6cs/l63Ojtd6otKjMx47Dq1utxfRxcavH1I7VSaL8n5BUaoutadnsX3AAVQ==
   dependencies:
     chokidar "^3.5.2"
     debug "^3.2.7"
