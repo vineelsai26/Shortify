@@ -4,9 +4,21 @@ import mongodb from 'mongoose'
 import UrlModel from './models/urlModel.js'
 import { nanoid } from 'nanoid'
 import 'dotenv/config'
+import fs from 'fs'
 
 const app = express()
-const mongodbUrl = process.env.MONGODB
+
+let mongodbUrl = process.env.MONGODB
+
+if (!!mongodbUrl) {
+    fs.readFile('/run/secrets/mongodb_url', (err, data) => {
+        if (err) {
+            console.error(err)
+        }
+
+        mongodbUrl = data.trim()
+    })
+}
 
 app.set('view engine', 'ejs')
 app.use(bodyParser.urlencoded({ extended: false }))
