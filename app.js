@@ -10,20 +10,24 @@ const app = express()
 
 let mongodbUrl = process.env.MONGODB
 
-if (!!mongodbUrl) {
-    fs.readFile('/run/secrets/mongodb_url', (err, data) => {
-        if (err) {
-            console.error(err)
-        }
-
-        mongodbUrl = data.trim()
-    })
+if (mongodbUrl === undefined || mongodbUrl?.trim() === '') {
+    try {
+        const data = fs.readFileSync('/run/secrets/mongodb_url')
+        mongodbUrl = data.toString().trim()
+    } catch (err) {
+        console.log(err)
+    }
 }
 
 app.set('view engine', 'ejs')
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 app.use(express.static('public'))
+
+if (mongodbUrl == undefined || mongodbUrl?.trim() === '') {
+    console.log('Please add mongodb url in .env file or mongodb_url file')
+    process.exit(1)
+}
 
 mongodb.connect(mongodbUrl)
 const connect = mongodb.connection
