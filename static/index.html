@@ -20,16 +20,6 @@
             <label for="url">
                 <input id="url" name="url" type="text" class="text" value="<%= postedUrl %>" required>
             </label>
-            <p class="errorMsg">
-                <%- error %>
-            </p>
-            <p class="redirectUrl">
-                <a href="<%= url %>" target="_blank" class="removeUnderline" rel="noopener noreferrer">
-                    <script>
-                        document.write("<%= url %>")
-                    </script>
-                </a>
-            </p>
             <input type="submit" class="button">
         </form>
     </div>

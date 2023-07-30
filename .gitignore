@@ -1,7 +1,2 @@
-.idea
-node_modules
 .env
-package-lock.json
-.yarn
-.serverless
 .DS_Store
