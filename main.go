@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"html/template"
 	"log"
 	"math/rand"
 	"net/http"
@@ -16,13 +17,11 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-// type URL struct {
-// 	id          primitive.ObjectID `bson:"_id"`
-// 	url         string             `bson:"url"`
-// 	redirectURL string             `bson:"redirectUrl"`
-// 	protocol    string             `bson:"protocol"`
-// 	createdAt   string             `bson:"createdAt"`
-// }
+type Html struct {
+	URL         string
+	RedirectURL string
+	Error       string
+}
 
 func getRedirectToURL(path string) string {
 	mongoURI := os.Getenv("MONGODB_URI")
@@ -154,36 +153,46 @@ func generateURL(id, url, protocol, createdAt string) error {
 	return nil
 }
 
-func redirect(path string, w http.ResponseWriter, r *http.Request) {
+func getProtocol(r *http.Request) string {
+	if r.TLS == nil {
+		return "http"
+	} else {
+		return "https"
+	}
+}
+
+func redirect(path string, w http.ResponseWriter, r *http.Request, t *template.Template) {
 	if r.Method == "POST" {
-		fmt.Println("url", r.PostFormValue("url"))
-		redirectToURL, protocol, err := formattedURL(r.PostFormValue("url"))
+		url := r.PostFormValue("url")
+
+		redirectToURL, protocol, err := formattedURL(url)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
+
 		getRedirectFromURL := getRedirectFromURL(redirectToURL)
-		fmt.Println("redirectToURL", getRedirectFromURL)
 		isURLExists := getRedirectFromURL != ""
 		if !isURLExists {
 			id := generateURLID(6)
 			createdAt := time.Now().String()
 			err = generateURL(id, redirectToURL, protocol, createdAt)
 			if err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
+				t.Execute(w, Html{
+					URL:   url,
+					Error: err.Error(),
+				})
 				return
 			}
-			if r.TLS == nil {
-				w.Write([]byte("http://" + r.Host + "/" + id))
-			} else {
-				w.Write([]byte("https://" + r.Host + "/" + id))
-			}
+			t.Execute(w, Html{
+				URL:         url,
+				RedirectURL: getProtocol(r) + "://" + r.Host + "/" + id,
+			})
 		} else {
-			if r.TLS == nil {
-				w.Write([]byte("http://" + r.Host + "/" + getRedirectFromURL))
-			} else {
-				w.Write([]byte("https://" + r.Host + "/" + getRedirectFromURL))
-			}
+			t.Execute(w, Html{
+				URL:         url,
+				RedirectURL: getProtocol(r) + "://" + r.Host + "/" + getRedirectFromURL,
+			})
 		}
 	} else if r.Method == "GET" {
 		redirectToURL := getRedirectToURL(path)
@@ -201,12 +210,18 @@ func main() {
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		path := r.URL.Path
+		t, err := template.ParseFiles("static/index.html")
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
 		if path == "/" && r.Method == "GET" {
-			http.ServeFile(w, r, "static/index.html")
+			t.Execute(w, nil)
 		} else if path == "/style.css" && r.Method == "GET" {
 			http.ServeFile(w, r, "static/style.css")
 		} else if len(strings.Split(path, "/")) == 2 {
-			redirect(strings.Split(path, "/")[1], w, r)
+			redirect(strings.Split(path, "/")[1], w, r, t)
 		} else {
 			w.WriteHeader(http.StatusNotFound)
 		}

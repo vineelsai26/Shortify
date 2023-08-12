@@ -1,34 +1,36 @@
 <html lang="en">
 
-<head>
-    <meta charset="UTF-8">
-    <link href="style.css" rel="stylesheet">
-    <link rel="icon" type="image/png" href="/icon.png">
-    <title>Shortify</title>
-</head>
+    <head>
+        <meta charset="UTF-8">
+        <link href="style.css" rel="stylesheet">
+        <link rel="icon" type="image/png" href="/icon.png">
+        <title>Shortify</title>
+    </head>
 
-<body>
-    <div id="navbar" class="navbar">
-        <a href="/" id="logo">Shortify</a>
-        <div class="navbarRight">
-            <a href="/">Home</a>
-            <a href="https://github.com/vineelsai26" target="_blank">GitHub</a>
+    <body>
+        <div id="navbar" class="navbar">
+            <a href="/" id="logo">Shortify</a>
+            <div class="navbarRight">
+                <a href="/">Home</a>
+                <a href="https://github.com/vineelsai26" target="_blank">GitHub</a>
+            </div>
         </div>
-    </div>
-    <div style="padding-top: 30vh;">
-        <form action="/" method="post" class="form">
-            <label for="url">
-                <input id="url" name="url" type="text" class="text" value="<%= postedUrl %>" required>
-            </label>
-            <input type="submit" class="button">
-        </form>
-    </div>
+        <div class="container">
+            <form action="/" method="post" class="form">
+                <input id="url" name="url" type="text" class="text" value="{{ .URL }}" required>
+                <input type="submit" class="button">
+            </form>
+            <div>
+                <p class="errorMsg">{{ .Error }}</p>
+                <a href="{{ .RedirectURL }}" class="redirectUrl removeUnderline">{{ .RedirectURL }}</a>
+            </div>
+        </div>
 
-    <div>
-        <p class="credit">By Vineel Sai, See Source at
-            <a href="https://github.com/vineelsai26/Shortify" target="_blank" class="removeUnderline">GitHub</a>
-        </p>
-    </div>
-</body>
+        <div>
+            <p class="credit">By Vineel Sai, See Source at
+                <a href="https://github.com/vineelsai26/Shortify" target="_blank" class="removeUnderline">GitHub</a>
+            </p>
+        </div>
+    </body>
 
 </html>
