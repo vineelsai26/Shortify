@@ -4,11 +4,23 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
+
+// Removes the protocol from the URL
+func GetFormattedURL(url string) (string, string, error) {
+	if strings.HasPrefix(url, "http://") || strings.HasPrefix(url, "https://") {
+		return strings.Split(url, "://")[1], strings.Split(url, "://")[0], nil
+	} else if !strings.Contains(url, "://") {
+		return url, "https", nil
+	} else {
+		return "", "", fmt.Errorf("protocol is not supported")
+	}
+}
 
 // Fetches the URL to redirect to from the database
 func GetRedirectToURL(path string) (string, error) {

@@ -28,7 +28,7 @@ func getProtocol(r *http.Request) string {
 func render(path string, w http.ResponseWriter, r *http.Request, t *template.Template) {
 	url := r.PostFormValue("url")
 
-	redirectToURL, protocol, err := utils.GenerateFormattedURL(url)
+	redirectToURL, protocol, err := utils.GetFormattedURL(url)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
