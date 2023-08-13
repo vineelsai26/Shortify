@@ -44,7 +44,7 @@ func GetRedirectToURL(path string) (string, error) {
 
 	coll := client.Database("URLS").Collection("urls")
 
-	filter := bson.D{{Key: "url", Value: path}}
+	filter := bson.D{{Key: "url", Value: sanitizeString(path)}}
 
 	var result bson.M
 	doc := coll.FindOne(context.TODO(), filter)
@@ -82,7 +82,7 @@ func GetRedirectFromURL(redirectUrl string) string {
 
 	coll := client.Database("URLS").Collection("urls")
 
-	filter := bson.D{{Key: "redirectUrl", Value: redirectUrl}}
+	filter := bson.D{{Key: "redirectUrl", Value: sanitizeUrl(redirectUrl)}}
 
 	var result bson.M
 	doc := coll.FindOne(context.TODO(), filter)
