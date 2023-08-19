@@ -7,7 +7,7 @@ import (
 
 func TestGenerateURLID(t *testing.T) {
 	n := 6
-	id := GenerateURLID(n)
+	id := sanitizeString(GenerateURLID(n))
 	if id == "" {
 		t.Errorf("Error while generating URL ID: %v", id)
 	}
