@@ -12,6 +12,6 @@ FROM vineelsai/alpine AS runner
 WORKDIR /usr/src/app
 
 COPY --from=builder /tmp/build/shortify .
-COPY --from=builder /tmp/build/static .
+COPY --from=builder /tmp/build/static static
 
 CMD ["./shortify"]
