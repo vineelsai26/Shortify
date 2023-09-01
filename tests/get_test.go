@@ -1,7 +1,9 @@
-package utils
+package tests
 
 import (
 	"testing"
+
+	"vineelsai.com/shortify/src/utils"
 )
 
 func TestGetFormattedURL(t *testing.T) {
@@ -12,7 +14,7 @@ func TestGetFormattedURL(t *testing.T) {
 	}
 
 	for _, url := range valid_urls {
-		_, _, err := GetFormattedURL(url)
+		_, _, err := utils.GetFormattedURL(url)
 		if err != nil {
 			t.Errorf("Error while generating formatted URL: %v", err)
 		}
@@ -24,7 +26,7 @@ func TestGetFormattedURL(t *testing.T) {
 	}
 
 	for _, url := range invalid_urls {
-		_, _, err := GetFormattedURL(url)
+		_, _, err := utils.GetFormattedURL(url)
 		if err == nil {
 			t.Errorf("Error while generating formatted URL: %v", err)
 		}
@@ -32,7 +34,7 @@ func TestGetFormattedURL(t *testing.T) {
 }
 
 func TestGetRedirectToURL(t *testing.T) {
-	url, err := GetRedirectToURL("LkO8rE1")
+	url, err := utils.GetRedirectToURL("LkO8rE1")
 	if err != nil {
 		t.Errorf("Error while fetching URL: %v", err)
 	}
@@ -47,7 +49,7 @@ func TestGetRedirectToURL(t *testing.T) {
 }
 
 func TestGetRedirectFromURL(t *testing.T) {
-	url := GetRedirectFromURL("vineelsai.com")
+	url := utils.GetRedirectFromURL("vineelsai.com")
 	if url == "" {
 		t.Errorf("Error while fetching URL: %v", url)
 	}

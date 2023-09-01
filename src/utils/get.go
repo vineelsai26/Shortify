@@ -9,6 +9,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+
+	"vineelsai.com/shortify/src/common"
 )
 
 // Removes the protocol from the URL
@@ -44,7 +46,7 @@ func GetRedirectToURL(path string) (string, error) {
 
 	coll := client.Database("URLS").Collection("urls")
 
-	filter := bson.D{{Key: "url", Value: sanitizeString(path)}}
+	filter := bson.D{{Key: "url", Value: common.SanitizeString(path)}}
 
 	var result bson.M
 	doc := coll.FindOne(context.TODO(), filter)
@@ -82,7 +84,7 @@ func GetRedirectFromURL(redirectUrl string) string {
 
 	coll := client.Database("URLS").Collection("urls")
 
-	filter := bson.D{{Key: "redirectUrl", Value: sanitizeUrl(redirectUrl)}}
+	filter := bson.D{{Key: "redirectUrl", Value: common.SanitizeUrl(redirectUrl)}}
 
 	var result bson.M
 	doc := coll.FindOne(context.TODO(), filter)

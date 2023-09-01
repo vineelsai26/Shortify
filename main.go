@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/joho/godotenv"
-	"vineelsai.com/shortify/utils"
+	"vineelsai.com/shortify/src/utils"
 )
 
 type Html struct {

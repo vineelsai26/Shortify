@@ -1,13 +1,16 @@
-package utils
+package tests
 
 import (
 	"strings"
 	"testing"
+
+	"vineelsai.com/shortify/src/common"
+	"vineelsai.com/shortify/src/utils"
 )
 
 func TestGenerateURLID(t *testing.T) {
 	n := 6
-	id := sanitizeString(GenerateURLID(n))
+	id := common.SanitizeString(utils.GenerateURLID(n))
 	if id == "" {
 		t.Errorf("Error while generating URL ID: %v", id)
 	}
