@@ -1,8 +1,8 @@
 package main
 
 import (
+	"fmt"
 	"html/template"
-	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -72,7 +72,7 @@ func redirect(path string, w http.ResponseWriter, r *http.Request) {
 func main() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		fmt.Println("Error loading .env file, using default values")
 	}
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
