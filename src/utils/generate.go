@@ -8,7 +8,6 @@ import (
 	"time"
 
 	_ "github.com/tursodatabase/go-libsql"
-	"vineelsai.com/shortify/src/common"
 )
 
 const letters = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -42,9 +41,9 @@ func GenerateURL(id, url, protocol, createdAt string) error {
 	}
 	defer db.Close()
 
-	insert_query := fmt.Sprintf("INSERT INTO urls (url, redirectUrl, protocol, createdAt) VALUES ('%s', '%s', '%s', '%s')", id, common.SanitizeString(url), common.SanitizeString(protocol), "-1")
+	insert_query := "INSERT INTO urls (url, redirectUrl, protocol, createdAt) VALUES (?, ?, ?, ?)"
 
-	res, err := db.Exec(insert_query)
+	res, err := db.Exec(insert_query, id, url, protocol, "-1")
 	if err != nil {
 		return err
 	}

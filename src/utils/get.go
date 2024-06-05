@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"os"
 	"strings"
-
-	"vineelsai.com/shortify/src/common"
 )
 
 type Redirect struct {
@@ -39,8 +37,8 @@ func GetRedirectToURL(path string) (string, error) {
 	}
 	defer db.Close()
 
-	select_query := fmt.Sprintf("SELECT protocol, redirectUrl FROM urls WHERE url='%s'", common.SanitizeString(path))
-	res, err := db.Query(select_query)
+	select_query := "SELECT protocol, redirectUrl FROM urls WHERE url=?"
+	res, err := db.Query(select_query, path)
 	if err != nil {
 		return "", err
 	}
@@ -70,8 +68,8 @@ func GetRedirectFromURL(redirectUrl string) string {
 	}
 	defer db.Close()
 
-	select_query := fmt.Sprintf("SELECT url FROM urls WHERE redirectUrl='%s'", redirectUrl)
-	res, err := db.Query(select_query)
+	select_query := "SELECT url FROM urls WHERE redirectUrl=?"
+	res, err := db.Query(select_query, redirectUrl)
 	if err != nil {
 		return ""
 	}
