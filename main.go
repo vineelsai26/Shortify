@@ -25,12 +25,12 @@ func getProtocol(r *http.Request) string {
 	}
 }
 
-func render(path string, w http.ResponseWriter, r *http.Request, t *template.Template) {
-	url := r.PostFormValue("url")
+func render(res http.ResponseWriter, req *http.Request, template *template.Template) {
+	url := req.PostFormValue("url")
 
 	redirectToURL, protocol, err := utils.GetFormattedURL(url)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		res.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
@@ -41,32 +41,35 @@ func render(path string, w http.ResponseWriter, r *http.Request, t *template.Tem
 		createdAt := time.Now().String()
 		err = utils.GenerateURL(id, redirectToURL, protocol, createdAt)
 		if err != nil {
-			t.Execute(w, Html{
+			template.Execute(res, Html{
 				URL:   url,
 				Error: err.Error(),
 			})
 			return
 		}
-		t.Execute(w, Html{
+		template.Execute(res, Html{
 			URL:         url,
-			RedirectURL: getProtocol(r) + "://" + r.Host + "/" + id,
+			RedirectURL: getProtocol(req) + "://" + req.Host + "/" + id,
 		})
 	} else {
-		t.Execute(w, Html{
+		template.Execute(res, Html{
 			URL:         url,
-			RedirectURL: getProtocol(r) + "://" + r.Host + "/" + getRedirectFromURL,
+			RedirectURL: getProtocol(req) + "://" + req.Host + "/" + getRedirectFromURL,
 		})
 	}
 }
 
 // redirects to the URL if it exists in the database
-func redirect(path string, w http.ResponseWriter, r *http.Request) {
+func redirect(path string, res http.ResponseWriter, req *http.Request) {
 	redirectToURL, err := utils.GetRedirectToURL(path)
 	if err != nil {
-		w.WriteHeader(http.StatusNotFound)
+		res.WriteHeader(http.StatusNotFound)
 		return
 	}
-	http.Redirect(w, r, redirectToURL, http.StatusTemporaryRedirect)
+
+	fmt.Println("Redirecting to URl - " + redirectToURL)
+
+	http.Redirect(res, req, redirectToURL, http.StatusTemporaryRedirect)
 }
 
 func main() {
@@ -75,24 +78,26 @@ func main() {
 		fmt.Println("Error loading .env file, using default values")
 	}
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		path := r.URL.Path
-		t, err := template.ParseFiles("static/index.html")
+	http.HandleFunc("/", func(res http.ResponseWriter, req *http.Request) {
+		path := req.URL.Path
+		template, err := template.ParseFiles("static/index.html")
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
+			res.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
-		if path == "/" && r.Method == "GET" {
-			t.Execute(w, nil)
-		} else if path == "/style.css" && r.Method == "GET" {
-			http.ServeFile(w, r, "static/style.css")
-		} else if len(strings.Split(path, "/")) == 2 && r.Method == "GET" {
-			redirect(strings.Split(path, "/")[1], w, r)
-		} else if len(strings.Split(path, "/")) == 2 && r.Method == "POST" {
-			render(strings.Split(path, "/")[1], w, r, t)
+		fmt.Println("req - " + req.Method + " - " + path + " FROM " + req.Host)
+
+		if path == "/" && req.Method == "GET" {
+			template.Execute(res, nil)
+		} else if path == "/style.css" && req.Method == "GET" {
+			http.ServeFile(res, req, "static/style.css")
+		} else if len(strings.Split(path, "/")) == 2 && req.Method == "GET" {
+			redirect(strings.Split(path, "/")[1], res, req)
+		} else if len(strings.Split(path, "/")) == 2 && req.Method == "POST" {
+			render(res, req, template)
 		} else {
-			w.WriteHeader(http.StatusNotFound)
+			res.WriteHeader(http.StatusNotFound)
 		}
 	})
 
