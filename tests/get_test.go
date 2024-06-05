@@ -34,7 +34,7 @@ func TestGetFormattedURL(t *testing.T) {
 }
 
 func TestGetRedirectToURL(t *testing.T) {
-	url, err := utils.GetRedirectToURL("LkO8rE1")
+	url, err := utils.GetRedirectToURL("XXsByp")
 	if err != nil {
 		t.Errorf("Error while fetching URL: %v", err)
 	}
@@ -54,7 +54,7 @@ func TestGetRedirectFromURL(t *testing.T) {
 		t.Errorf("Error while fetching URL: %v", url)
 	}
 
-	if url != "LkO8rE1" {
+	if url != "XXsByp" {
 		t.Errorf("Error while fetching URL: %v", url)
 	}
 }

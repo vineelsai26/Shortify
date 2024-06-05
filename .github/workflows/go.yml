@@ -10,7 +10,8 @@ on:
     branches: [ "main" ]
 
 env:
-  MONGODB_URI: ${{ secrets.MONGODB_URI }}
+  TURSO_DATABASE: ${{ secrets.TURSO_DATABASE }}
+  TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
 
 jobs:
   build:
