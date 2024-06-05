@@ -1,17 +1,19 @@
 package utils
 
 import (
-	"context"
+	"database/sql"
 	"fmt"
 	"os"
 	"strings"
 
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-
 	"vineelsai.com/shortify/src/common"
 )
+
+type Redirect struct {
+	url         string
+	redirectUrl string
+	protocol    string
+}
 
 // Removes the protocol from the URL
 func GetFormattedURL(url string) (string, string, error) {
@@ -26,76 +28,59 @@ func GetFormattedURL(url string) (string, string, error) {
 
 // Fetches the URL to redirect to from the database
 func GetRedirectToURL(path string) (string, error) {
-	mongoURI := os.Getenv("MONGODB_URI")
-	if mongoURI == "" {
-		panic("MONGODB_URI is not set")
-	}
+	database_url := os.Getenv("TURSO_DATABASE")
+	auth_token := os.Getenv("TURSO_AUTH_TOKEN")
 
-	opts := options.Client().ApplyURI(mongoURI)
-
-	client, err := mongo.Connect(context.TODO(), opts)
+	turso_url := "libsql://" + database_url + ".turso.io?authToken=" + auth_token
+	db, err := sql.Open("libsql", turso_url)
 	if err != nil {
-		panic(err)
+		fmt.Fprintf(os.Stderr, "failed to open db %s: %s", turso_url, err)
+		os.Exit(1)
 	}
+	defer db.Close()
 
-	defer func() {
-		if err = client.Disconnect(context.TODO()); err != nil {
-			panic(err)
-		}
-	}()
-
-	coll := client.Database("URLS").Collection("urls")
-
-	filter := bson.D{{Key: "url", Value: common.SanitizeString(path)}}
-
-	var result bson.M
-	doc := coll.FindOne(context.TODO(), filter)
-
-	err = doc.Decode(&result)
+	select_query := fmt.Sprintf("SELECT protocol, redirectUrl FROM urls WHERE url='%s'", common.SanitizeString(path))
+	res, err := db.Query(select_query)
 	if err != nil {
-		if err == mongo.ErrNoDocuments {
-			return "", fmt.Errorf("URL not found")
-		}
 		return "", err
 	}
+	defer res.Close()
 
-	return result["protocol"].(string) + "://" + result["redirectUrl"].(string), nil
+	fmt.Println(res.Next())
+
+	var redirect Redirect
+	res.Scan(&redirect.protocol, &redirect.redirectUrl)
+	if redirect.redirectUrl == "" {
+		return "", fmt.Errorf("URL Not found")
+	}
+
+	return redirect.protocol + "://" + redirect.redirectUrl, nil
 }
 
 // Fetches Short URL Path Name from the database
 func GetRedirectFromURL(redirectUrl string) string {
-	mongoURI := os.Getenv("MONGODB_URI")
-	if mongoURI == "" {
-		panic("MONGODB_URI is not set")
-	}
+	database_url := os.Getenv("TURSO_DATABASE")
+	auth_token := os.Getenv("TURSO_AUTH_TOKEN")
 
-	opts := options.Client().ApplyURI(mongoURI)
-
-	client, err := mongo.Connect(context.TODO(), opts)
+	turso_url := "libsql://" + database_url + ".turso.io?authToken=" + auth_token
+	db, err := sql.Open("libsql", turso_url)
 	if err != nil {
-		panic(err)
+		fmt.Fprintf(os.Stderr, "failed to open db %s: %s", turso_url, err)
+		os.Exit(1)
 	}
+	defer db.Close()
 
-	defer func() {
-		if err = client.Disconnect(context.TODO()); err != nil {
-			panic(err)
-		}
-	}()
-
-	coll := client.Database("URLS").Collection("urls")
-
-	filter := bson.D{{Key: "redirectUrl", Value: common.SanitizeUrl(redirectUrl)}}
-
-	var result bson.M
-	doc := coll.FindOne(context.TODO(), filter)
-
-	err = doc.Decode(&result)
+	select_query := fmt.Sprintf("SELECT url FROM urls WHERE redirectUrl='%s'", redirectUrl)
+	res, err := db.Query(select_query)
 	if err != nil {
-		if err == mongo.ErrNoDocuments {
-			return ""
-		}
-		panic(err)
+		return ""
 	}
+	defer res.Close()
 
-	return result["url"].(string)
+	fmt.Println(res.Next())
+
+	var redirect Redirect
+	res.Scan(&redirect.url)
+
+	return redirect.url
 }

@@ -1,15 +1,13 @@
 package utils
 
 import (
-	"context"
+	"database/sql"
 	"fmt"
 	"math/rand"
 	"os"
 	"time"
 
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	_ "github.com/tursodatabase/go-libsql"
 )
 
 const letters = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -31,30 +29,26 @@ func GenerateURLID(n int) string {
 
 // Create a new URL in the database
 func GenerateURL(id, url, protocol, createdAt string) error {
-	mongoURI := os.Getenv("MONGODB_URI")
-	if mongoURI == "" {
-		panic("MONGODB_URI is not set")
+	database_url := os.Getenv("TURSO_DATABASE")
+	auth_token := os.Getenv("TURSO_AUTH_TOKEN")
+
+	turso_url := "libsql://" + database_url + ".turso.io?authToken=" + auth_token
+
+	db, err := sql.Open("libsql", turso_url)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to open db %s: %s", turso_url, err)
+		os.Exit(1)
 	}
+	defer db.Close()
 
-	opts := options.Client().ApplyURI(mongoURI)
+	insert_query := fmt.Sprintf("INSERT INTO urls (url, redirectUrl, protocol, createdAt) VALUES ('%s', '%s', '%s', '%s')", id, url, protocol, "-1")
 
-	client, err := mongo.Connect(context.TODO(), opts)
+	res, err := db.Exec(insert_query)
 	if err != nil {
 		return err
 	}
 
-	defer func() {
-		client.Disconnect(context.TODO())
-	}()
-
-	coll := client.Database("URLS").Collection("urls")
-
-	item := bson.D{{Key: "url", Value: id}, {Key: "redirectUrl", Value: url}, {Key: "protocol", Value: protocol}, {Key: "createdAt", Value: createdAt}}
-
-	_, err = coll.InsertOne(context.TODO(), item)
-	if err != nil {
-		return err
-	}
+	fmt.Println(res.LastInsertId())
 
 	return nil
 }

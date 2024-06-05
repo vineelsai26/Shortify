@@ -4,18 +4,11 @@ go 1.20
 
 require (
 	github.com/joho/godotenv v1.5.1
-	go.mongodb.org/mongo-driver v1.15.0
+	github.com/tursodatabase/go-libsql v0.0.0-20240429120401-651096bbee0b
 )
 
 require (
-	github.com/golang/snappy v0.0.4 // indirect
-	github.com/klauspost/compress v1.16.7 // indirect
-	github.com/montanaflynn/stats v0.7.1 // indirect
-	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
-	github.com/xdg-go/scram v1.1.2 // indirect
-	github.com/xdg-go/stringprep v1.0.4 // indirect
-	github.com/youmark/pkcs8 v0.0.0-20201027041543-1326539a0a0a // indirect
-	golang.org/x/crypto v0.17.0 // indirect
-	golang.org/x/sync v0.3.0 // indirect
-	golang.org/x/text v0.14.0 // indirect
+	github.com/antlr4-go/antlr/v4 v4.13.0 // indirect
+	github.com/libsql/sqlite-antlr4-parser v0.0.0-20240327125255-dbf53b6cbf06 // indirect
+	golang.org/x/exp v0.0.0-20230515195305-f3d0a9c9a5cc // indirect
 )
