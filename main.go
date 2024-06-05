@@ -17,14 +17,6 @@ type Html struct {
 	Error       string
 }
 
-func getProtocol(r *http.Request) string {
-	if r.TLS == nil {
-		return "http"
-	} else {
-		return "https"
-	}
-}
-
 func render(res http.ResponseWriter, req *http.Request, template *template.Template) {
 	url := req.PostFormValue("url")
 
@@ -49,12 +41,12 @@ func render(res http.ResponseWriter, req *http.Request, template *template.Templ
 		}
 		template.Execute(res, Html{
 			URL:         url,
-			RedirectURL: getProtocol(req) + "://" + req.Host + "/" + id,
+			RedirectURL: "https://" + req.Host + "/" + id,
 		})
 	} else {
 		template.Execute(res, Html{
 			URL:         url,
-			RedirectURL: getProtocol(req) + "://" + req.Host + "/" + getRedirectFromURL,
+			RedirectURL: "https://" + req.Host + "/" + getRedirectFromURL,
 		})
 	}
 }
