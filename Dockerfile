@@ -1,6 +1,6 @@
-FROM golang:1.22 AS builder
+FROM golang:1.22
 
-WORKDIR /tmp/build
+WORKDIR /usr/src/app
 
 COPY . .
 
