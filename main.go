@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"net/http"
@@ -11,19 +12,22 @@ import (
 	"vineelsai.com/shortify/src/utils"
 )
 
-type Html struct {
+type RedirectHTMLResponse struct {
 	URL         string
 	RedirectURL string
 	Error       string
 }
 
-func render(res http.ResponseWriter, req *http.Request, template *template.Template) {
-	url := req.PostFormValue("url")
+type RedirectResponse struct {
+	RedirectToUrl   string   `json:"redirectToUrl"`
+	RedirectFromUrl string   `json:"redirectFromUrl"`
+	Errors          []string `json:"errors"`
+}
 
+func generateRedirectURL(url string) (string, error) {
 	redirectToURL, protocol, err := utils.GetFormattedURL(url)
 	if err != nil {
-		res.WriteHeader(http.StatusBadRequest)
-		return
+		return "", err
 	}
 
 	getRedirectFromURL := utils.GetRedirectFromURL(redirectToURL)
@@ -33,20 +37,28 @@ func render(res http.ResponseWriter, req *http.Request, template *template.Templ
 		createdAt := time.Now().String()
 		err = utils.GenerateURL(id, redirectToURL, protocol, createdAt)
 		if err != nil {
-			template.Execute(res, Html{
-				URL:   url,
-				Error: err.Error(),
-			})
-			return
+			return "", err
 		}
-		template.Execute(res, Html{
-			URL:         url,
-			RedirectURL: "https://" + req.Host + "/" + id,
-		})
+		return id, nil
 	} else {
-		template.Execute(res, Html{
+		return getRedirectFromURL, nil
+	}
+}
+
+func render(res http.ResponseWriter, req *http.Request, template *template.Template) {
+	url := req.PostFormValue("url")
+	redirectToURL, err := generateRedirectURL(url)
+
+	if err != nil {
+		template.Execute(res, RedirectHTMLResponse{
+			URL:   url,
+			Error: err.Error(),
+		})
+		return
+	} else {
+		template.Execute(res, RedirectHTMLResponse{
 			URL:         url,
-			RedirectURL: "https://" + req.Host + "/" + getRedirectFromURL,
+			RedirectURL: "https://" + req.Host + "/" + redirectToURL,
 		})
 	}
 }
@@ -86,6 +98,15 @@ func main() {
 			http.ServeFile(res, req, "static/style.css")
 		} else if path == "/icon.png" && req.Method == "GET" {
 			http.ServeFile(res, req, "static/icon.png")
+		} else if path == "/api" && req.Method == "POST" {
+			url := req.PostFormValue("url")
+			redirectToURL, err := generateRedirectURL(url)
+			if err != nil {
+				res.WriteHeader(http.StatusBadRequest)
+				return
+			}
+			redirectResponse := RedirectResponse{RedirectToUrl: url, RedirectFromUrl: "https://" + req.Host + "/" + redirectToURL, Errors: []string{}}
+			json.NewEncoder(res).Encode(redirectResponse)
 		} else if len(strings.Split(path, "/")) == 2 && req.Method == "GET" {
 			redirect(strings.Split(path, "/")[1], res, req)
 		} else if len(strings.Split(path, "/")) == 2 && req.Method == "POST" {
