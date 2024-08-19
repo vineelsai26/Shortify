@@ -84,6 +84,8 @@ func main() {
 			template.Execute(res, nil)
 		} else if path == "/style.css" && req.Method == "GET" {
 			http.ServeFile(res, req, "static/style.css")
+		} else if path == "/icon.png" && req.Method == "GET" {
+			http.ServeFile(res, req, "static/icon.png")
 		} else if len(strings.Split(path, "/")) == 2 && req.Method == "GET" {
 			redirect(strings.Split(path, "/")[1], res, req)
 		} else if len(strings.Split(path, "/")) == 2 && req.Method == "POST" {
@@ -93,5 +95,6 @@ func main() {
 		}
 	})
 
+	fmt.Println("Server started on port 3000")
 	http.ListenAndServe(":3000", nil)
 }
